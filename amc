@@ -10,7 +10,6 @@ my $FileEditor = "/bin/nano";
 my $InitDName = "/home/ircdaemon/bin/anope";
 my $ANOPEDIR = "/home/ircdaemon/services";
 my $BackupCommand = "/home/ircdaemon/AnopeBackup/anopebackup.pl -snapshot";
-my $AnopeLog = "/home/ircdaemon/services/log/mud.log";
 my $Pager = "/usr/bin/less";
 my $AMCDir = "/home/ircdaemon/AnopeManagementConsole";
 my $BackupToolDir = "/home/ircdaemon/AnopeBackup";
@@ -20,6 +19,7 @@ my $BinDir = "/home/ircdaemon/bin";
 my $DEBUG_MODE = "off";
 my $CONFDIR = "$ANOPEDIR/conf";
 my $PidFile = "/home/ircdaemon/services/anope.pid";
+my $GetLogFileCommand = "ls -t $ANOPEDIR/logs/|head -1";
 
 ###################################################
 # No changes below here
@@ -394,8 +394,10 @@ while (-1)
 	}
 	elsif ($menuselection eq "8")
 	{
-                # View the log file
-                system("$Pager $AnopeLog");
+		# View the log file
+		my $AnopeLog = qx{$GetLogFileCommand};
+		chop($AnopeLog);
+		system("$Pager $ANOPEDIR/logs/$AnopeLog");
 	}
 	elsif ($menuselection eq "9")
 	{
