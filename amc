@@ -1,0 +1,464 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+
+use UI::Dialog;
+use Term::ReadKey;
+use Term::ANSIScreen qw(cls);
+
+my $FileEditor = "/bin/nano";
+my $InitDName = "/home/ircdaemon/bin/anope";
+my $ANOPEDIR = "/home/ircdaemon/services";
+my $BackupCommand = "/home/ircdaemon/AnopeBackup/anopebackup.pl -snapshot";
+my $AnopeLog = "/home/ircdaemon/services/log/mud.log";
+my $Pager = "/usr/bin/less";
+my $AMCDir = "/home/ircdaemon/AnopeManagementConsole";
+my $BackupToolDir = "/home/ircdaemon/AnopeBackup";
+my $StartupDir = "/home/ircdaemon/AnopeStartup";
+my $UpdateCommand = "/usr/bin/git pull";
+my $BinDir = "/home/ircdaemon/bin";
+my $DEBUG_MODE = "off";
+my $CONFDIR = "$ANOPEDIR/conf";
+my $PidFile = "/home/ircdaemon/services/anope.pid";
+
+###################################################
+# No changes below here
+###################################################
+
+my $AMC_ver = "1.0.0";
+my $Record = "false";	# Are results saved?
+my $TempDir = "/tmp";
+my $RobotName = "";
+my $BotVersion = "";
+my $UserName = "";
+my $ServerStatus = "foo";
+
+sub PrintDebugCommand
+{
+	if ($DEBUG_MODE eq "off")
+	{
+		return;
+	}
+	my $PassedString = shift;
+	print "About to run:\n$PassedString\n";
+	print "Press Enter To Run This:";
+	my $entered = <STDIN>;
+}
+
+my $d = new UI::Dialog ( backtitle => "Anope Management Console v$AMC_ver", height => 20, width => 65, listheight => 5,
+	order => [ 'ascii', 'cdialog', 'xdialog' ]);
+
+my $windowtitle = "Welcome to the Anope Management Console!";
+my $enjoyedtitle = "We hope you enjoyed AMC!";
+my $introtext =
+"This is the Anope Management Console, a utility for Anope operators
+to manage their servers from a text UI rather than the command line.";
+
+$d->msgbox( title => $windowtitle, text => $introtext );
+
+if (($d->state() eq "ESC") || ($d->state() eq "CANCEL"))
+{
+	exit 0;
+}
+
+my $menuselection = "";
+
+sub IsRunning
+{
+        if (! -f $PidFile)
+        {
+                print "PID file not found\n";
+                return("nope");
+        }
+        # PID file found, checking for process
+        open(my $fh, '<:encoding(UTF-8)', $PidFile);
+        if ($fh eq "")
+        {
+                print "Could not open file '$PidFile' for reading $!";
+                return("nope");
+        }
+        my $CurLine = 0;
+        while (my $row = <$fh>)
+        {
+                chomp $row;
+                print "Read pid file '$row'\n";
+                $CurLine = $row;
+        }
+        close($fh);
+        if (kill(0, $CurLine) != 1)
+        {
+                return "nope";
+        }
+        return "anope";
+}
+
+sub CheckServerStatus
+{
+	my $running=IsRunning();
+	if ($running eq "anope")
+	{
+		$ServerStatus = "Running";
+	}
+	else
+	{
+		$ServerStatus = "Stopped";
+	}
+
+}
+
+sub DoUpdate
+{
+	my $DesiredDir = $_[0];
+
+	# Update desired utility
+	chdir ($DesiredDir);
+	PrintDebugCommand("Running $UpdateCommand in $DesiredDir\n");
+	system("$UpdateCommand");
+	print "Press Enter To Continue";
+	my $entered = <STDIN>;
+}
+
+sub ConfigFileMenu
+{
+	my $WantRespawn="ON";
+	CheckServerStatus();
+	if (-f "$ANOPEDIR/nostart")
+	{
+		$WantRespawn="OFF";
+	}
+	$menuselection = $d->menu( title => "Edit Config Files Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
+                            list => [ '1', 'Blocked',
+                                      '2', 'Classes',
+                                      '3', 'Conblocked',
+                                      '4', 'Credits',
+                                      '5', 'DoneAcct.',
+                                      '6', 'Down',
+                                      '7', 'Email',
+                                      '8', 'Inclination',
+                                      '9', 'Newacct',
+                                      '10', 'NewCharDone',
+                                      '11', 'NewChar',
+                                      '12', 'NoLogins',
+                                      '13', 'Offline',
+                                      '14', 'Races',
+                                      '15', 'Rules',
+                                      '16', 'SelChar',
+                                      '17', 'Stats',
+                                      '18', 'Themes',
+                                      'q', 'Main Menu' ] );
+}
+
+sub ConfigFile
+{
+	while (-1)
+	{
+		ConfigFileMenu();
+		if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+		{
+			return;
+		}
+		elsif ($menuselection eq "1")
+		{
+			# Edit blocked.txt file
+			system("$FileEditor $CONFDIR/blocked.txt");
+		}
+		elsif ($menuselection eq "2")
+		{
+			# Edit classes.txt file
+			system("$FileEditor $CONFDIR/classes.txt");
+		}
+		elsif ($menuselection eq "3")
+		{
+			# Edit conblocked.txt file
+			system("$FileEditor $CONFDIR/conblocked.txt");
+		}
+		elsif ($menuselection eq "4")
+		{
+			# Edit conblocked.txt file
+			system("$FileEditor $CONFDIR/credits.txt");
+		}
+		elsif ($menuselection eq "5")
+		{
+			# Edit doneacct.txt file
+			system("$FileEditor $CONFDIR/doneacct.txt");
+		}
+		elsif ($menuselection eq "6")
+		{
+			# Edit down.txt file
+			system("$FileEditor $CONFDIR/down.txt");
+		}
+		elsif ($menuselection eq "7")
+		{
+			# Edit email.txt file
+			system("$FileEditor $CONFDIR/email.txt");
+		}
+		elsif ($menuselection eq "8")
+		{
+			# Edit inclination.txt file
+			system("$FileEditor $CONFDIR/inclination.txt");
+		}
+		elsif ($menuselection eq "9")
+		{
+			# Edit newacct.txt file
+			system("$FileEditor $CONFDIR/newacct.txt");
+		}
+		elsif ($menuselection eq "10")
+		{
+			# Edit newchardone.txt file
+			system("$FileEditor $CONFDIR/newchardone.txt");
+		}
+		elsif ($menuselection eq "11")
+		{
+			# Edit newchar.txt file
+			system("$FileEditor $CONFDIR/newchar.txt");
+		}
+		elsif ($menuselection eq "12")
+		{
+			# Edit nologins.txt file
+			system("$FileEditor $CONFDIR/nologins.txt");
+		}
+		elsif ($menuselection eq "13")
+		{
+			# Edit offline.txt file
+			system("$FileEditor $CONFDIR/offline.txt");
+		}
+		elsif ($menuselection eq "14")
+		{
+			# Edit races.txt file
+			system("$FileEditor $CONFDIR/races.txt");
+		}
+		elsif ($menuselection eq "15")
+		{
+			# Edit rules.txt file
+			system("$FileEditor $CONFDIR/rules.txt");
+		}
+		elsif ($menuselection eq "16")
+		{
+			# Edit selchar.txt file
+			system("$FileEditor $CONFDIR/selchar.txt");
+		}
+		elsif ($menuselection eq "17")
+		{
+			# Edit stats.txt file
+			system("$FileEditor $CONFDIR/stats.txt");
+		}
+		elsif ($menuselection eq "18")
+		{
+			# Edit themes.txt file
+			system("$FileEditor $CONFDIR/themes.txt");
+		}
+	}
+}
+
+sub UpdateToolsMenu
+{
+	my $WantRespawn="ON";
+	CheckServerStatus();
+	if (-f "$ANOPEDIR/nostart")
+	{
+		$WantRespawn="OFF";
+	}
+	$menuselection = $d->menu( title => "Update Utilities Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
+                            list => [ '1', 'Update AMC',
+                                      '2', 'Update Backup',
+                                      '3', 'Update Startup',
+                                      'q', 'Main Menu' ] );
+}
+
+sub UpdateTools
+{
+	while (-1)
+	{
+		UpdateToolsMenu();
+		if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+		{
+			return;
+		}
+		elsif ($menuselection eq "1")
+		{
+			# Update AMC
+			DoUpdate($AMCDir);
+		}
+		elsif ($menuselection eq "2")
+		{
+			# Update BackupToolDir
+			DoUpdate($BackupToolDir);
+		}
+		elsif ($menuselection eq "3")
+		{
+			# Update Startup
+			DoUpdate($StartupDir);
+			if (! -d $BinDir)
+			{
+				print "Binary dir $BinDir not found, creating...\n";
+				system("mkdir -p $BinDir");
+			}
+			system("cp $StartupDir/anope $BinDir");
+			system("cp $StartupDir/startanope $ANOPEDIR");
+		}
+	}
+}
+
+sub ProcesKillMenu
+{
+        my $WantRespawn="ON";
+        CheckServerStatus();
+        if (-f "$ANOPEDIR/nostart")
+        {
+                $WantRespawn="OFF";
+        }
+
+        $menuselection = $d->menu( title => "Process Kill Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
+                            list => [ '1', 'Request Clean',
+                                      '2', 'Force Kill',
+                                      'q', 'Main Menu' ] );
+}
+
+sub ProcessKill
+{
+        while (-1)
+        {
+		CheckServerStatus();
+                ProcesKillMenu();
+                if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+                {
+                        return;
+                }
+                elsif ($menuselection eq "1")
+                {
+			if ($ServerStatus eq "Running")
+			{
+				# Reset the server process
+				print "Killing mud process, please wait...";
+				system("killall services");
+				sleep(10);
+			}
+			else
+			{
+				print "Process not running...";
+				sleep(3)
+			}
+
+                }
+                elsif ($menuselection eq "2")
+                {
+                        # Force-kill server process
+                        if ($d->yesno( text => "Confirm force-killing Anope process", text => "Are you *SURE* you want to force kill the Anope process?\nYou should first try the \#1 option and see if that works" ))
+                        {
+				if ($ServerStatus eq "Running")
+				{
+					print "Force-killing mud process, please wait for 5 seconds...";
+					system("killall -s9 services");
+					sleep(5);
+				}
+				else
+				{
+					print "Process not running...";
+					sleep(3)
+				}
+                        }
+                }
+        }
+}
+
+sub MainMenu
+{
+	my $WantRespawn="ON";
+	CheckServerStatus();
+	if (-f "$ANOPEDIR/nostart")
+	{
+		$WantRespawn="OFF";
+	}
+
+	$menuselection = $d->menu( title => "Main Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
+                            list => [ '1', 'Start Watchdog',
+                                      '2', 'Stop Watchdog',
+                                      '3', 'Server Console',
+                                      '4', 'Turn Respawn Off',
+                                      '5', 'Turn Respawn On',
+                                      '6', 'Edit services.conf',
+                                      '7', 'Backup Anope',
+                                      '8', 'View Anope Log',
+                                      '9', 'Kill Anope Proc',
+                                      '10', 'Update Utils',
+                                      '11', 'Edit Configs',
+                                      'q', 'Quit AMC' ] );
+}
+
+while (-1)
+{
+	MainMenu();
+	if (($menuselection eq "CANCEL") || ($menuselection eq "ESC") || ($menuselection eq "") || ($menuselection eq "q") || ($menuselection eq "Q"))
+	{
+		$d->msgbox( title => $enjoyedtitle, text => "Thanks for using AMC..." );
+		exit 0;
+	}
+	if ($menuselection eq "1")
+	{
+                if ($d->yesno( text => "Confirm starting the server watchdog", text => "Are you sure you want to start the server watchdog? You should likely use option #9 instead..." ))
+                {
+                        system("$InitDName start");
+                        sleep(10);
+                }
+	}
+	elsif ($menuselection eq "2")
+	{
+		if ($d->yesno( text => "Confirm stopping the server watchdog", text => "Are you sure you want to shut down the server watchdog?" ))
+		{
+			system("$InitDName stop");
+			sleep(5);
+		}
+	}
+	elsif ($menuselection eq "3")
+	{
+		$d->msgbox( text => "To exit the Anope console and return to AMC press CTRL-A CTRL-D" );
+		system("screen -r Anope");
+	}
+	elsif ($menuselection eq "4")
+	{
+		# Turn off respawn
+		system("touch $ANOPEDIR/nostart");
+	}
+	elsif ($menuselection eq "5")
+	{
+		# Turn respawn back on
+		if (-f "$ANOPEDIR/nostart")
+		{
+			unlink("$ANOPEDIR/nostart");
+		}
+	}
+	elsif ($menuselection eq "6")
+	{
+		# Edit services.conf file
+		system("$FileEditor $CONFDIR/services.conf");
+	}
+	elsif ($menuselection eq "7")
+	{
+                # Run a backup
+                system("clear");
+                system("$BackupCommand");
+                print "Press Enter To Continue";
+                my $entered = <STDIN>;
+	}
+	elsif ($menuselection eq "8")
+	{
+                # View the log file
+                system("$Pager $AnopeLog");
+	}
+	elsif ($menuselection eq "9")
+	{
+		ProcessKill();
+	}
+	elsif ($menuselection eq "10")
+	{
+		# Update Menu
+		UpdateTools();
+	}
+	elsif ($menuselection eq "11")
+	{
+		# Text File Menu
+		ConfigFile();
+	}
+}
+
+exit 0;
