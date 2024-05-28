@@ -12,7 +12,7 @@ I suggest you then add this to your /home/ircdaemon/.bashrc file:
 	export PATH=/home/ircdaemon/bin:/home/ircdaemon/AnopeManagementConsole:$PATH
 You will need to install the required perl modules (as root):
 
-- /home/ircdaemon/AnopeManagementConsole/installdeps
+- sudo /home/ircdaemon/AnopeManagementConsole/installdeps
 
 
 After that you should log out and back in and now "amc" should work.
