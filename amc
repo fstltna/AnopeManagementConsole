@@ -127,24 +127,16 @@ sub ConfigFileMenu
 		$WantRespawn="OFF";
 	}
 	$menuselection = $d->menu( title => "Edit Config Files Menu", text => "Server is $ServerStatus and respawn is $WantRespawn - Select one:",
-                            list => [ '1', 'Blocked',
-                                      '2', 'Classes',
-                                      '3', 'Conblocked',
-                                      '4', 'Credits',
-                                      '5', 'DoneAcct.',
-                                      '6', 'Down',
-                                      '7', 'Email',
-                                      '8', 'Inclination',
-                                      '9', 'Newacct',
-                                      '10', 'NewCharDone',
-                                      '11', 'NewChar',
-                                      '12', 'NoLogins',
-                                      '13', 'Offline',
-                                      '14', 'Races',
-                                      '15', 'Rules',
-                                      '16', 'SelChar',
-                                      '17', 'Stats',
-                                      '18', 'Themes',
+                            list => [ '1', 'Botserv',
+                                      '2', 'Chanserv',
+                                      '3', 'Chanstats',
+                                      '4', 'Global',
+                                      '5', 'Hostserv',
+                                      '6', 'Memoserv',
+                                      '7', 'Modules',
+                                      '8', 'Nickserv',
+                                      '9', 'Operserv',
+                                      '10', 'Stats',
                                       'q', 'Main Menu' ] );
 }
 
@@ -159,93 +151,53 @@ sub ConfigFile
 		}
 		elsif ($menuselection eq "1")
 		{
-			# Edit blocked.txt file
-			system("$FileEditor $CONFDIR/blocked.txt");
+			# Edit Botserv.conf
+			system("$FileEditor $CONFDIR/botserv.conf");
 		}
 		elsif ($menuselection eq "2")
 		{
-			# Edit classes.txt file
-			system("$FileEditor $CONFDIR/classes.txt");
+			# Edit Chanserv.conf
+			system("$FileEditor $CONFDIR/chanserv.conf");
 		}
 		elsif ($menuselection eq "3")
 		{
-			# Edit conblocked.txt file
-			system("$FileEditor $CONFDIR/conblocked.txt");
+			# Edit Chanstats.conf
+			system("$FileEditor $CONFDIR/chanstats.conf");
 		}
 		elsif ($menuselection eq "4")
 		{
-			# Edit conblocked.txt file
-			system("$FileEditor $CONFDIR/credits.txt");
+			# Edit Global.conf
+			system("$FileEditor $CONFDIR/global.conf");
 		}
 		elsif ($menuselection eq "5")
 		{
-			# Edit doneacct.txt file
-			system("$FileEditor $CONFDIR/doneacct.txt");
+			# Edit Hostserv.conf
+			system("$FileEditor $CONFDIR/hostserv.conf");
 		}
 		elsif ($menuselection eq "6")
 		{
-			# Edit down.txt file
-			system("$FileEditor $CONFDIR/down.txt");
+			# Edit Memoserv.conf
+			system("$FileEditor $CONFDIR/memoserv.conf");
 		}
 		elsif ($menuselection eq "7")
 		{
-			# Edit email.txt file
-			system("$FileEditor $CONFDIR/email.txt");
+			# Edit Modules.conf
+			system("$FileEditor $CONFDIR/modules.conf");
 		}
 		elsif ($menuselection eq "8")
 		{
-			# Edit inclination.txt file
-			system("$FileEditor $CONFDIR/inclination.txt");
+			# Edit Nickserv.conf
+			system("$FileEditor $CONFDIR/nickserv.conf");
 		}
 		elsif ($menuselection eq "9")
 		{
-			# Edit newacct.txt file
-			system("$FileEditor $CONFDIR/newacct.txt");
+			# Edit Operserv.conf
+			system("$FileEditor $CONFDIR/operserv.conf");
 		}
 		elsif ($menuselection eq "10")
 		{
-			# Edit newchardone.txt file
-			system("$FileEditor $CONFDIR/newchardone.txt");
-		}
-		elsif ($menuselection eq "11")
-		{
-			# Edit newchar.txt file
-			system("$FileEditor $CONFDIR/newchar.txt");
-		}
-		elsif ($menuselection eq "12")
-		{
-			# Edit nologins.txt file
-			system("$FileEditor $CONFDIR/nologins.txt");
-		}
-		elsif ($menuselection eq "13")
-		{
-			# Edit offline.txt file
-			system("$FileEditor $CONFDIR/offline.txt");
-		}
-		elsif ($menuselection eq "14")
-		{
-			# Edit races.txt file
-			system("$FileEditor $CONFDIR/races.txt");
-		}
-		elsif ($menuselection eq "15")
-		{
-			# Edit rules.txt file
-			system("$FileEditor $CONFDIR/rules.txt");
-		}
-		elsif ($menuselection eq "16")
-		{
-			# Edit selchar.txt file
-			system("$FileEditor $CONFDIR/selchar.txt");
-		}
-		elsif ($menuselection eq "17")
-		{
-			# Edit stats.txt file
-			system("$FileEditor $CONFDIR/stats.txt");
-		}
-		elsif ($menuselection eq "18")
-		{
-			# Edit themes.txt file
-			system("$FileEditor $CONFDIR/themes.txt");
+			# Edit Stats.conf
+			system("$FileEditor $CONFDIR/stats.conf");
 		}
 	}
 }
